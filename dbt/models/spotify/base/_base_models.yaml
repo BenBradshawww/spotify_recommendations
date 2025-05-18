@@ -1,0 +1,327 @@
+version: 2
+
+models:
+  - name: base_spotify__recent_tracks
+    description: "Base model for data from spotify_last_tracks."
+    columns:
+      - name: spotify_recent_track_id
+        description: "Unique identifier for the last track."
+        tests:
+          - unique
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_recent_track_updated_at
+        description: "Timestamp of the last update for the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+      - name: spotify_recent_track_track_played_at
+        description: "Timestamp when the track was played."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+      - name: spotify_recent_track_artist_name
+        description: "Name of the artist of the last track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_recent_track_track_name
+        description: "Name of the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_recent_track_track_id
+        description: "Identifier for the track that was played."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+  
+  - name: base_spotify__old_tracks
+    description: "Base model for data from spotify_old_tracks."
+    columns:
+      - name: spotify_old_track_id
+        description: "Unique identifier for the old track."
+        tests:
+          - unique
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_old_track_created_at
+        description: "Timestamp of the creation for the old track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+      - name: spotify_old_track_updated_at
+        description: "Timestamp of the last update for the old track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+      - name: spotify_old_tracks_started_playing_at
+        description: "Timestamp when the track started playing."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+      - name: spotify_old_tracks_artist_name
+        description: "Name of the artist of the old track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_old_tracks_track_name
+        description: "Name of the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_old_tracks_album_name
+        description: "Name of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_old_tracks_ms_played
+        description: "Milliseconds the track was played."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
+      - name: spotify_old_tracks_reason_start
+        description: "Reason why the track started playing."
+        meta:
+          dimension:
+            type: string
+      - name: spotify_old_tracks_reason_end
+        description: "Reason why the track stopped playing."
+        meta:
+          dimension:
+            type: string
+      - name: spotify_old_tracks_shuffle
+        description: "Whether shuffle was enabled."
+        meta:
+          dimension:
+            type: boolean
+      - name: spotify_old_tracks_skipped
+        description: "Whether the track was skipped."
+        meta:
+          dimension:
+            type: boolean
+      - name: spotify_old_tracks_offline
+        description: "Whether the track was played offline."
+        meta:
+          dimension:
+            type: boolean
+      - name: spotify_old_tracks_track_id
+        description: "Identifier for the track that was played."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+
+  - name: base_spotify__track_meta_data
+    description: "Base model for data from spotify_track_meta_data."
+    columns:
+      - name: spotify_track_meta_data_id
+        description: "Unique identifier for the track meta data."
+        tests:
+          - unique
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_track_meta_data_track_id
+        description: "Identifier for the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_track_meta_data_name
+        description: "Name of the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_track_meta_data_artists
+        description: "Names of the artists of the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_track_meta_data_album_name
+        description: "Name of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_track_meta_data_duration_ms
+        description: "Duration of the track in milliseconds."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
+      - name: spotify_track_meta_data_track_number
+        description: "Track number of the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
+      - name: spotify_track_meta_data_popularity
+        description: "Popularity of the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
+
+  - name: base_spotify__playlists
+    description: "Base model for data from spotify_playlists."
+    columns:
+      - name: spotify_playlist_id
+        description: "Unique identifier for the playlist."
+        tests:
+          - unique
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_created_at
+        description: "Timestamp of the creation of the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+      - name: spotify_playlist_updated_at
+        description: "Timestamp of the last update of the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+      - name: spotify_playlist_playlist_id
+        description: "Identifier for the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_playlist_name
+        description: "Name of the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_owner_id
+        description: "Identifier for the owner of the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_owner_name
+        description: "Name of the owner of the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_date
+        description: "Date the playlist was added to the data"
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: date
+      - name: spotify_playlist_added_at
+        description: "Timestamp of the addition of the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+      - name: spotify_playlist_added_by_id
+        description: "Identifier for the user who added the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_track_id
+        description: "Identifier for the track in the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_track_name
+        description: "Name of the track in the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_track_artists
+        description: "Names of the artists of the track in the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_track_artists_id
+        description: "Identifiers of the artists of the track in the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_track_album_name
+        description: "Name of the album of the track in the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_playlist_track_track_number
+        description: "Track number of the track in the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
+      - name: spotify_playlist_track_duration_ms
+        description: "Duration of the track in milliseconds."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number

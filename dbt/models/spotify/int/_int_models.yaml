@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: int_spotify__all_heard_tracks
+    description: "Intermediate model combining data from spotify_old_tracks and spotify_last_tracks."
+    columns:
+      - name: spotify_id
+        description: "Unique identifier for the track play."
+        tests:
+          - unique
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_track_id
+        description: "Identifier for the track that was played."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_artist_name
+        description: "Name of the artist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_track_name
+        description: "Name of the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_album_name
+        description: "Name of the album. Only available for old tracks."
+        meta:
+          dimension:
+            type: string
+      - name: spotify_ms_played
+        description: "Milliseconds the track was played. Only available for old tracks."
+        meta:
+          dimension:
+            type: number
+      - name: spotify_reason_start
+        description: "Reason why the track started playing. Only available for old tracks."
+        meta:
+          dimension:
+            type: string
+      - name: spotify_reason_end
+        description: "Reason why the track stopped playing. Only available for old tracks."
+        meta:
+          dimension:
+            type: string
+      - name: spotify_shuffle
+        description: "Whether shuffle was enabled. Only available for old tracks."
+        meta:
+          dimension:
+            type: boolean
+      - name: spotify_skipped
+        description: "Whether the track was skipped. Only available for old tracks."
+        meta:
+          dimension:
+            type: boolean
+      - name: spotify_offline
+        description: "Whether the track was played offline. Only available for old tracks."
+        meta:
+          dimension:
+            type: boolean
+      - name: spotify_track_played_at
+        description: "Timestamp when the track was played."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: timestamp
+  - name: int_spotify__not_heard_tracks
+    description: "Tracks that have not been heard."
+    columns:
+      - name: spotify_track_id
+        description: "Identifier for the track that was played."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string

@@ -1,0 +1,20 @@
+# Environment variables
+.env
+
+# Data
+data/
+
+# cache
+.cache/
+
+# logs
+logs/
+
+# virtualenv
+myenv/
+
+# target
+target/
+
+# cache
+.cache

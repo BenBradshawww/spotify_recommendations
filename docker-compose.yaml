@@ -1,0 +1,20 @@
+services:
+  lightdash:
+    container_name: lightdash
+    platform: linux/amd64
+    image: lightdash/lightdash:latest
+    depends_on:
+      - dbt
+    env_file:
+      - .env
+    volumes:
+      - ./.dbt:/root/.dbt
+      - ./dbt:/usr/app/dbt
+      - ./lightdash:/usr/src/app
+      - lightdash-data:/app/data
+      - lightdash-logs:/app/logs
+    ports:
+      - ${PORT:-8081}:${PORT:-8081}
+volumes:
+  lightdash-data: {}
+  lightdash-logs: {}
