@@ -28,7 +28,7 @@ The current data pipeline operates as follows:
 
 A Lambda function triggers an hourly script that fetches the most recent tracks I’ve listened to using the Spotify API and stores the data in an S3 bucket.
 
-When I’m ready to update the database, I manually start an EC2 instance and run the `update_db.py` script. This script uploads the new track data from S3 to a PostgreSQL database hosted on the EC2 instance. Once the database is updated, I run dbt run to refresh the dbt-managed tables.
+When I’m ready to update the database, I manually start an EC2 instance and run the `update_db.py` script. This script uploads the new track data from S3 to a PostgreSQL database hosted on the EC2 instance. Once the database is updated, I run dbt run to refresh the dbt-managed tables. I will be working on automating this process where I will use a Lambda function to trigger the EC2 instance and run the `update_db.py` script and `dbt run`. Once completed, the Lambda function will close the EC2 instance to save on costs.
 
 ## Recommendation System
 
