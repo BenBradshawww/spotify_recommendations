@@ -4,7 +4,7 @@
 
 The current data pipeline operates as follows:
 
-![Data Pipeline](data/images/spotify_recommendations_pipeline.png)
+![Data Pipeline](images/spotify_recommendations_pipeline.png)
 
 A Lambda function triggers an hourly script that fetches the most recent tracks I’ve listened to using the Spotify API and stores the data in an S3 bucket.
 
