@@ -17,6 +17,7 @@ This project is a data pipeline and recommendation system for Spotify. It is bui
     <img src="https://img.shields.io/badge/Spotify%20API-1DB954?style=for-the-badge&logo=spotify&logoColor=white" alt="Spotify API">
     <img src="https://img.shields.io/badge/Bash-121011?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Bash">
     <img src="https://img.shields.io/badge/Lightdash-1A73E8?style=for-the-badge&logoColor=white" alt="Lightdash">
+    <img src="https://img.shields.io/badge/Tailscale-0046FF?style=for-the-badge&logo=tailscale&logoColor=white" alt="Tailscale">
 </p>
 
 
@@ -28,11 +29,19 @@ The current data pipeline operates as follows:
 
 A Lambda function triggers an hourly script that fetches the most recent tracks I’ve listened to using the Spotify API and stores the data in an S3 bucket.
 
-When I’m ready to update the database, I manually start an EC2 instance and run the `update_db.py` script. This script uploads the new track data from S3 to a PostgreSQL database hosted on the EC2 instance. Once the database is updated, I run dbt run to refresh the dbt-managed tables. I will be working on automating this process where I will use a Lambda function to trigger the EC2 instance and run the `update_db.py` script and `dbt run`. Once completed, the Lambda function will close the EC2 instance to save on costs.
+When I’m ready to update the database, I manually start an EC2 instance and run the `update_db.py` script. This script uploads the new track data from S3 to a PostgreSQL database hosted on the EC2 instance. Once the database is updated, I run dbt run to refresh the dbt-managed tables.
+
+I will be working on automating this process. There will be a Lambda function that will trigger the EC2 instance and run the `update_db.py` script and `dbt run`. Once completed, the Lambda function will close the EC2 instance to save on costs.
 
 ## Recommendation System
 
 Work in progress…
+
+## Other Notes
+
+- I am using the `pgAdmin` to manage my PostgreSQL database.
+- I am using the `Lightdash` to view my dbt-managed tables.
+- I am using the `Tailscale` to connect to the EC2 instance from any network. Currently, my EC2 only accepts connections from my home network so to bypass this I use Tailscale to connect to the EC2 instance from any network.
 
 ## Next Steps
 - Create a base table for album metadata.
