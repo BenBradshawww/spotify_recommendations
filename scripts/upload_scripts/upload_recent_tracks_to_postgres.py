@@ -104,7 +104,7 @@ def move_to_processed_folder(source_key: str):
 def upload_recent_tracks_to_db():
     try:
         with SSHTunnelForwarder(
-            (get_public_ip(), 22),
+            (os.getenv("TAILSCALE_IP"), 22),
             ssh_username='ec2-user',
             ssh_pkey=os.getenv("SSH_KEY_PATH"),
             remote_bind_address=('localhost', 5432),

@@ -5,8 +5,10 @@ CREATE TABLE IF NOT EXISTS spotify_track_meta_data (
     spotify_track_meta_data_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     spotify_track_meta_data_track_id VARCHAR(255) NOT NULL,
     spotify_track_meta_data_track_name VARCHAR(255) NOT NULL,
-    spotify_track_meta_data_album VARCHAR(255) NOT NULL,
-    spotify_track_meta_data_artists JSONB NOT NULL,
+    spotify_track_meta_data_album_id VARCHAR(255) NOT NULL,
+    spotify_track_meta_data_album_name VARCHAR(255) NOT NULL,
+    spotify_track_meta_data_artist_ids JSONB NOT NULL,
+    spotify_track_meta_data_artist_names JSONB NOT NULL,
     spotify_track_meta_data_track_release_date VARCHAR(255) NOT NULL,
     spotify_track_meta_data_track_duration_ms FLOAT NOT NULL,
     spotify_track_meta_data_track_number INT NOT NULL,
@@ -26,8 +28,10 @@ COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_created_at IS 
 COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_updated_at IS 'Timestamp of when the track metadata was last updated';
 COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_track_id IS 'Spotify track ID of the last track played';
 COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_track_name IS 'Track name of the last track played';
-COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_album IS 'Album name of the last track played';
-COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_artists IS 'Artists of the last track played';
+COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_album_id IS 'Album ID of the last track played';
+COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_album_name IS 'Album name of the last track played';
+COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_artist_ids IS 'Artist IDs of the last track played';
+COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_artist_names IS 'Artist names of the last track played';
 COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_track_release_date IS 'Release date of the last track played';
 COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_track_number IS 'Track number of the last track played';
 COMMENT ON COLUMN spotify_track_meta_data.spotify_track_meta_data_track_duration_ms IS 'Duration of the last track played';

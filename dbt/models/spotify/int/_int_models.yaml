@@ -85,3 +85,27 @@ models:
         meta:
           dimension:
             type: string
+      - name: spotify_track_name
+        description: "Name of the track."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+  - name: int_spotify__all_tracks
+    description: "Intermediate model combining data from int_spotify__heard_tracks and int_spotify__not_heard_tracks."
+    columns:
+      - name: spotify_track_id
+        description: "Identifier for the track that was played."
+        tests:
+          - not_null 
+        meta:
+          dimension:
+            type: string
+      - name: spotify_track_name
+        description: "Name of the track."
+        tests:  
+          - not_null
+        meta:
+          dimension:
+            type: string

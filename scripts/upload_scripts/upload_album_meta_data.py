@@ -3,16 +3,11 @@ import os
 import traceback
 import psycopg2
 from sshtunnel import SSHTunnelForwarder
-from psycopg2.extras import execute_values, Json
 import logging
-from spotipy import Spotify
-from spotipy.oauth2 import SpotifyClientCredentials
 import dotenv
 import json
 
-from utilities import get_public_ip, upload_rows_to_postgres, create_spotify_client
-
-
+from utilities import upload_rows_to_postgres, create_spotify_client, normalize_date
 # ----------------------------
 # Load environment variables
 # ----------------------------
@@ -25,39 +20,42 @@ dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-
 # ----------------------------
 # Create clients
 # ----------------------------
 ec2 = boto3.client('ec2')
 
-
 # ----------------------------
 # Helper functions
 # ----------------------------
-def get_artist_metadata(artists: list[str]) -> list[tuple[str, str, str, str, str, str, str, str]]:
+def get_album_metadata(albums: list[str]) -> list[tuple]:
 
-    n = len(artists)
-    artists_meta_data:list[tuple] = []
+    n = len(albums)
+    albums_meta_data:list[tuple] = []
 
-    for i in range(0, n, 50):
-        logger.info(f"Getting metadata for {i} to {min(i + 50, n)} of {n} artists...")
-        section = artists[i: i + 50]
-        response = sp.artists(section)
+    for i in range(0, n, 20):
+        logger.info(f"Getting metadata for {i} to {min(i + 20, n)} of {n} albums...")
+        section = albums[i: i + 20]
+        response = sp.albums(section)
 
-        for artist in response["artists"]:
-            artist_meta_data = (
-                artist["id"],
-                artist["name"],
-                artist["followers"]["total"],
-                artist["popularity"],
-                json.dumps(artist["genres"]),
+        for album in response["albums"]:
+            album_meta_data = (
+                album["id"],
+                album["name"],
+                normalize_date(album["release_date"]),
+                album["total_tracks"],
+                album["album_type"],
+                json.dumps([a["id"] for a in album["artists"]]),
+                json.dumps([a["name"] for a in album["artists"]]),
+                album["label"],
+                album["popularity"],
             )
-            artists_meta_data.append(artist_meta_data)
+            albums_meta_data.append(album_meta_data)
 
-    return artists_meta_data
+    return albums_meta_data
 
-def get_artist_ids():
+
+def get_album_ids():
     try:
         with SSHTunnelForwarder(
                 (os.getenv("TAILSCALE_IP"), 22),
@@ -74,7 +72,7 @@ def get_artist_ids():
                     port=tunnel.local_bind_port
                 )
 
-                sql_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "get_artist_ids_without_meta_data.sql")
+                sql_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "get_album_ids_without_meta_data.sql")
                 sql = open(sql_path, "r").read()
 
                 with conn.cursor() as cur:
@@ -90,27 +88,27 @@ def get_artist_ids():
 # ----------------------------
 # Main function
 # ----------------------------
-def upload_artist_meta_data():
+def upload_album_meta_data():
     
     global sp
     sp = create_spotify_client()
 
-    # Get track ids
-    logger.info("Getting track ids for tracks with no metadata")
-    artists = get_artist_ids()
+    # Get album ids
+    logger.info("Getting album ids for albums with no metadata...")
+    albums = get_album_ids()
 
-    logger.info(f"Found {len(artists)} artists with no metadata.")
+    logger.info(f"Found {len(albums)} albums with no metadata.")
 
-    # Get track metadata
-    logger.info("Getting artist metadata...")
-    artists_meta_data = get_artist_metadata(artists)
+    # Get album metadata
+    logger.info("Getting album metadata...")
+    albums_meta_data = get_album_metadata(albums)
 
-    # Upload track metadata to db
-    logger.info("Uploading artist metadata to db...")
-    sql_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "insert_artist_meta_data.sql")
-    upload_rows_to_postgres(artists_meta_data, sql_path)
+    # Upload album metadata to db
+    logger.info("Uploading album metadata to db...")
+    sql_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "insert_album_meta_data.sql")
+    upload_rows_to_postgres(albums_meta_data, sql_path)
 
     logger.info("Done!")
     
 if __name__ == "__main__":
-    upload_artist_meta_data()
+    upload_album_meta_data()

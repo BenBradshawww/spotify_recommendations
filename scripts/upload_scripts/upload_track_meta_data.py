@@ -18,17 +18,6 @@ dotenv.load_dotenv()
 
 
 # ----------------------------
-# Constants
-# ----------------------------
-
-SOURCE_BUCKET_NAME = 'ben-spotify'
-SOURCE_BUCKET_PREFIX = 'recently_played_tracks'
-
-OUTPUT_BUCKET_NAME = 'ben-spotify'
-OUTPUT_BUCKET_PREFIX = 'recently_played_tracks_processed'
-
-
-# ----------------------------
 # Logging
 # ----------------------------
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -56,8 +45,10 @@ def get_track_metadata(tracks: list[str]) -> list[tuple[str, str, str, str, str,
             track_meta_data = (
                 track["id"],
                 track["name"],
-                json.dumps([a["name"] for a in track["artists"]]),
+                track["album"]["id"],
                 track["album"]["name"],
+                json.dumps([a["id"] for a in track["artists"]]),
+                json.dumps([a["name"] for a in track["artists"]]),
                 track["album"]["release_date"],
                 track["duration_ms"],
                 track["track_number"],
@@ -70,7 +61,7 @@ def get_track_metadata(tracks: list[str]) -> list[tuple[str, str, str, str, str,
 def get_track_ids():
     try:
         with SSHTunnelForwarder(
-                (get_public_ip(), 22),
+                (os.getenv("TAILSCALE_IP"), 22),
                 ssh_username='ec2-user',
                 ssh_pkey=os.getenv("SSH_KEY_PATH"),
                 remote_bind_address=('localhost', 5432),
@@ -100,7 +91,7 @@ def get_track_ids():
 # ----------------------------
 # Main function
 # ----------------------------
-def upload_tracks_meta_data():
+def upload_track_meta_data():
     
     global sp
     sp = create_spotify_client()
@@ -123,4 +114,4 @@ def upload_tracks_meta_data():
     logger.info("Done!")
     
 if __name__ == "__main__":
-    upload_tracks_meta_data()
+    upload_track_meta_data()

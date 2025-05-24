@@ -35,5 +35,5 @@ tracks_without_meta_data AS (
     SELECT * FROM meta_data_tracks
 )
 
-SELECT DISTINCT spotify_recent_tracks_track_id 
+SELECT DISTINCT spotify_track_id 
 FROM tracks_without_meta_data

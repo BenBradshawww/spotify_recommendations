@@ -65,7 +65,7 @@ def upload_rows_to_postgres(rows: list[tuple[str]], sql_path: str) -> None:
 
     try:
         with SSHTunnelForwarder(
-            (get_public_ip(), 22),
+            (os.getenv("TAILSCALE_IP"), 22),
             ssh_username='ec2-user',
             ssh_pkey=os.getenv("SSH_KEY_PATH"),
             remote_bind_address=('localhost', 5432),
@@ -90,24 +90,25 @@ def upload_rows_to_postgres(rows: list[tuple[str]], sql_path: str) -> None:
         raise e
     
 
-def normalize_date(date_str: str) -> datetime.date:
+def normalize_date(date_str):
     """
-    Given a string like "2021", "2021-07", or "2021-07-23",
-    returns a datetime.date object, filling missing month/day with 01.
+    Normalize Spotify's release_date string (which may be in YYYY, YYYY-MM, or YYYY-MM-DD format)
+    into a full YYYY-MM-DD string. Returns None for invalid input.
     """
-    if not date_str:
-        raise ValueError("Empty date string")
+    if not date_str or not isinstance(date_str, str):
+        return None
 
-    parts = date_str.split("-")
-    if len(parts) == 1:
-        # only year
-        normalized = f"{parts[0]}-01-01"
-    elif len(parts) == 2:
-        # year and month
-        normalized = f"{parts[0]}-{parts[1]}-01"
-    else:
-        # already full date, or extra data we ignore
-        normalized = date_str
-
-    # parse into a date object
-    return datetime.strptime(normalized, "%Y-%m-%d").date()
+    try:
+        if len(date_str) == 4:  # YYYY
+            normalized = f"{date_str}-01-01"
+        elif len(date_str) == 7:  # YYYY-MM
+            normalized = f"{date_str}-01"
+        elif len(date_str) == 10:  # YYYY-MM-DD
+            normalized = date_str
+        else:
+            return None  # Invalid format
+        
+        # Check if it's a valid date
+        return datetime.strptime(normalized, "%Y-%m-%d").date()
+    except ValueError:
+        return None

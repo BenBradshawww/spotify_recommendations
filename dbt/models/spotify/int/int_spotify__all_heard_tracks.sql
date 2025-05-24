@@ -10,7 +10,7 @@ WITH old_tracks AS (
         spotify_old_tracks_shuffle AS spotify_shuffle,
         spotify_old_tracks_skipped AS spotify_skipped,
         spotify_old_tracks_offline AS spotify_offline,
-        TO_CHAR(spotify_old_tracks_played_at, 'YYYY-MM-DD HH24:MI:SS.MS') AS spotify_track_played_at
+        spotify_old_tracks_played_at::timestamp AS spotify_track_played_at
     FROM {{ ref('base_spotify__old_tracks') }}
 ),
 
@@ -26,7 +26,7 @@ last_tracks AS (
         CAST(NULL AS BOOLEAN) AS spotify_shuffle,
         CAST(NULL AS BOOLEAN) AS spotify_skipped,
         CAST(NULL AS BOOLEAN) AS spotify_offline,
-        TO_CHAR(spotify_recent_tracks_track_played_at, 'YYYY-MM-DD HH24:MI:SS.MS') AS spotify_track_played_at
+        spotify_recent_tracks_track_played_at::timestamp AS spotify_track_played_at
     FROM {{ ref('base_spotify__recent_tracks')}}
 ),
 

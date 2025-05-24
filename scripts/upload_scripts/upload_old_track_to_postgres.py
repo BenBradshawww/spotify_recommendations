@@ -111,7 +111,7 @@ def insert_to_db(cur, rows):
 def upload_last_songs_to_db():
     try:
         with SSHTunnelForwarder(
-            (get_public_ip(), 22),
+            (os.getenv("TAILSCALE_IP"), 22),
             ssh_username='ec2-user',
             ssh_pkey=os.getenv("SSH_KEY_PATH"),
             remote_bind_address=('localhost', 5432),

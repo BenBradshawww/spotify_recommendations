@@ -325,3 +325,118 @@ models:
         meta:
           dimension:
             type: number
+      - name: spotify_playlist_track_popularity
+        description: "Popularity of the track in the playlist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
+
+  - name: base_spotify__artist_meta_data
+    description: "Base model for data from spotify_artist_meta_data."
+    columns:
+      - name: spotify_artist_meta_data_id
+        description: "Unique identifier for the artist meta data."
+        tests:
+          - unique
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_artist_meta_data_artist_name
+        description: "Name of the artist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string  
+      - name: spotify_artist_meta_data_artist_followers_total
+        description: "Number of followers of the artist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number  
+      - name: spotify_artist_meta_data_artist_popularity
+        description: "Popularity of the artist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
+      - name: spotify_artist_meta_data_artist_genres
+        description: "Genres of the artist."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+
+  - name: base_spotify__album_meta_data
+    description: "Base model for data from spotify_album_meta_data."
+    columns:
+      - name: spotify_album_meta_data_id
+        description: "Unique identifier for the album meta data."
+        tests:
+          - unique
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_album_meta_data_album_name
+        description: "Name of the album."
+        tests:
+          - not_null  
+        meta:
+          dimension:
+            type: string
+      - name: spotify_album_meta_data_album_release_date
+        description: "Release date of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_album_meta_data_album_total_tracks
+        description: "Total tracks of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
+      - name: spotify_album_meta_data_album_type
+        description: "Type of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string  
+      - name: spotify_album_meta_data_album_artist_ids
+        description: "Identifiers of the artists of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_album_meta_data_album_artist_names
+        description: "Names of the artists of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_album_meta_data_album_label
+        description: "Label of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: string
+      - name: spotify_album_meta_data_album_popularity
+        description: "Popularity of the album."
+        tests:
+          - not_null
+        meta:
+          dimension:
+            type: number
