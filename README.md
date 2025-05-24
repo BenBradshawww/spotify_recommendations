@@ -29,8 +29,9 @@ The current data pipeline operates as follows:
 
 A Lambda function triggers an hourly script that fetches the most recent tracks I’ve listened to using the Spotify API and stores the data in an S3 bucket.
 
-When I’m ready to update the database, I manually start an EC2 instance and run the `update_db.py` script. This script uploads the new track data from S3 to a PostgreSQL database hosted on the EC2 instance. Once the database is updated, I run dbt run to refresh the dbt-managed tables.
+When I’m ready to update the database, I manually start an EC2 instance and run the `update_db.py` script. This script uploads the new track data from S3 to a PostgreSQL database hosted on the EC2 instance. Once the database is updated, I run dbt run to refresh the dbt-managed models. The photo below shows the dbt models that are currently implemented.
 
+![dbt Models](images/dbt_models.png)
 I will be working on automating this process. There will be a Lambda function that will trigger the EC2 instance and run the `update_db.py` script and `dbt run`. Once completed, the Lambda function will close the EC2 instance to save on costs.
 
 ## Recommendation System
@@ -44,10 +45,6 @@ Work in progress…
 - I am using the `Tailscale` to connect to the EC2 instance from any network. Currently, my EC2 only accepts connections from my home network so to bypass this I use Tailscale to connect to the EC2 instance from any network.
 
 ## Next Steps
-- Create a base table for album metadata.
-- Create a base table for artist metadata.
-- Create a features table for albums.
-- Create a features table for artists.
 - Generate embedding vectors for each track using Word2Vec or a similar technique.
 - Perform a nearest neighbor (NN) or approximate nearest neighbor (ANN) search to identify similar tracks—comparing tracks I’ve listened to with those I haven’t.
 - Build a playlist populated with the recommended tracks.
