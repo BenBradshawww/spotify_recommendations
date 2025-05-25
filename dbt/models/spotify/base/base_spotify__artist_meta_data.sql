@@ -11,9 +11,9 @@ model AS (
         spotify_artist_meta_data_updated_at,
         spotify_artist_meta_data_artist_id,
         spotify_artist_meta_data_artist_name,
-        spotify_artist_meta_data_artist_followers_total,
-        spotify_artist_meta_data_artist_popularity,
-        spotify_artist_meta_data_artist_genres
+        COALESCE(spotify_artist_meta_data_artist_followers_total, 0) AS spotify_artist_meta_data_artist_followers_total,
+        COALESCE(spotify_artist_meta_data_artist_popularity, 0) AS spotify_artist_meta_data_artist_popularity,
+        spotify_artist_meta_data_artist_genres AS spotify_artist_meta_data_artist_genres
     FROM source
 )
 

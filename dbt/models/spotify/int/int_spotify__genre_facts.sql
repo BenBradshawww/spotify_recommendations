@@ -67,8 +67,8 @@ genre_ids_with_listen_counts AS (
         COALESCE(three_month_genre_listen_counts.three_month_genre_listen_count, 0) AS three_month_genre_listen_count,
         COALESCE(one_year_genre_listen_counts.one_year_genre_listen_count, 0) AS one_year_genre_listen_count,
         lifetime_genre_listen_counts.lifetime_genre_listen_count AS lifetime_genre_listen_count,
-        (three_month_genre_listen_counts.three_month_genre_listen_count / lifetime_genre_listen_counts.lifetime_genre_listen_count) AS three_month_genre_listen_prop,
-        (one_year_genre_listen_counts.one_year_genre_listen_count / lifetime_genre_listen_counts.lifetime_genre_listen_count) AS one_year_genre_listen_prop
+        COALESCE(three_month_genre_listen_counts.three_month_genre_listen_count::FLOAT / lifetime_genre_listen_counts.lifetime_genre_listen_count::FLOAT, 0) AS three_month_genre_listen_prop,
+        COALESCE(one_year_genre_listen_counts.one_year_genre_listen_count::FLOAT / lifetime_genre_listen_counts.lifetime_genre_listen_count::FLOAT, 0) AS one_year_genre_listen_prop
     FROM genres
     LEFT JOIN three_month_genre_listen_counts
         ON genres.spotify_track_genre = three_month_genre_listen_counts.spotify_track_genre

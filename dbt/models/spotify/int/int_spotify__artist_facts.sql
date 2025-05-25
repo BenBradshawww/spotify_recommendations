@@ -58,8 +58,8 @@ artist_ids_with_listen_counts AS (
         COALESCE(three_month_artist_listen_counts.three_month_artist_listen_count, 0) AS three_month_artist_listen_count,
         COALESCE(one_year_artist_listen_counts.one_year_artist_listen_count, 0) AS one_year_artist_listen_count,
         lifetime_artist_listen_counts.lifetime_artist_listen_count AS lifetime_artist_listen_count,
-        (three_month_artist_listen_counts.three_month_artist_listen_count / lifetime_artist_listen_counts.lifetime_artist_listen_count) AS three_month_artist_listen_prop,
-        (one_year_artist_listen_counts.one_year_artist_listen_count / lifetime_artist_listen_counts.lifetime_artist_listen_count) AS one_year_artist_listen_prop
+        COALESCE(three_month_artist_listen_counts.three_month_artist_listen_count::FLOAT / lifetime_artist_listen_counts.lifetime_artist_listen_count::FLOAT, 0) AS three_month_artist_listen_prop,
+        COALESCE(one_year_artist_listen_counts.one_year_artist_listen_count::FLOAT / lifetime_artist_listen_counts.lifetime_artist_listen_count::FLOAT, 0) AS one_year_artist_listen_prop
     FROM artist_ids
     LEFT JOIN three_month_artist_listen_counts
         ON artist_ids.spotify_artist_id = three_month_artist_listen_counts.spotify_artist_id

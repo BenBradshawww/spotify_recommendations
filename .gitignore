@@ -18,3 +18,6 @@ target/
 
 # cache
 .cache
+
+# pycach
+__pycache__/
