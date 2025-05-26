@@ -36,7 +36,7 @@ I will be working on automating this process. There will be a Lambda function th
 
 ## Recommendation System
 
-Work in progress…
+Every feature is converted to a number and then scaled to a range of 0-1. This results in a dataframe with 10,000 columns and 100,000 rows which resulted in massive memory usage. To reduce the dimensionality of the data I used the TruncatedSVD to reduce the dimensionality of the columns to 100. Finally, I used cosine similarity to generate a playlist of recommended tracks based on the tracks I've listened to and those that have released in the last week.
 
 ## Other Notes
 
@@ -45,7 +45,7 @@ Work in progress…
 - I am using the `Tailscale` to connect to the EC2 instance from any network. Currently, my EC2 only accepts connections from my home network so to bypass this I use Tailscale to connect to the EC2 instance from any network.
 
 ## Next Steps
-- Generate embedding vectors for each track using Word2Vec or a similar technique.
-- Perform a nearest neighbor (NN) or approximate nearest neighbor (ANN) search to identify similar tracks—comparing tracks I’ve listened to with those I haven’t.
-- Build a playlist populated with the recommended tracks.
+- Investigate the use of Feature Hashing for the categorical features. 
+- Investigate the use of GNNs for genre and artist recommendations.
+- Investigate 
 
