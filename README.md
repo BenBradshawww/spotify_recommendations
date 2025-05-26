@@ -45,7 +45,7 @@ Every feature is converted to a number and then scaled to a range of 0-1. This r
 - I am using the `Tailscale` to connect to the EC2 instance from any network. Currently, my EC2 only accepts connections from my home network so to bypass this I use Tailscale to connect to the EC2 instance from any network.
 
 ## Next Steps
+- Remove missing genre one hot encoded columns.
 - Investigate the use of Feature Hashing for the categorical features. 
 - Investigate the use of GNNs for genre and artist recommendations.
-- Investigate 
 
