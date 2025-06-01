@@ -108,6 +108,6 @@ LEFT JOIN track_facts
     ON all_tracks.spotify_track_id = track_facts.spotify_track_id
     AND all_tracks.spotify_artist_id = track_facts.spotify_artist_id
     AND all_tracks.spotify_album_id = track_facts.spotify_album_id
-    AND all_tracks.spotify_artist_genre = track_facts.spotify_artist_genre
+    AND all_tracks.spotify_artist_genre IS NOT DISTINCT FROM track_facts.spotify_artist_genre
 
 

@@ -34,7 +34,6 @@ load_dotenv()
 # -----------------
 # Constants
 # -----------------
-# I've removed "spotify_artist_popularity" for now
 COLUMNS_TO_KEEP = [
     "spotify_track_id",
     "spotify_track_heard",
@@ -42,6 +41,7 @@ COLUMNS_TO_KEEP = [
     "spotify_track_release_date",
     "spotify_track_duration_ms",
     "spotify_artist_followers_total",
+    "spotify_artist_popularity",
     "spotify_artist_genre",
     "three_month_artist_listen_count",
     "one_year_artist_listen_count",
@@ -71,7 +71,7 @@ COLUMNS_FOR_LOG_1P_MINMAX_SCALER = [
 ]
 
 COLUMNS_FOR_DIVIDE_BY_100 = [
-	#"spotify_artist_popularity",
+	"spotify_artist_popularity",
 ]
 
 COLUMNS_FOR_RANK_TRANSFORM = [
@@ -135,20 +135,46 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     df = rank_transform_columns(df, COLUMNS_FOR_RANK_TRANSFORM)
 
     # Drop the columns that are not needed
-    logger.info(f"Dropping the columns that are not needed...")
+    logger.info(f"Dropping the columns that are not needed: spotify_track_release_date, spotify_track_heard...")
     df = df.drop(columns=["spotify_track_release_date", "spotify_track_heard"])
 
     # One-hot encoding the columns
     logger.info(f"One-hot encoding the columns: {COLUMNS_FOR_ONE_HOT_ENCODING}...")
     df = one_hot_encode_columns(df, COLUMNS_FOR_ONE_HOT_ENCODING)
 
+    # Drop the columns that are not needed
+    missing_columns = [col for col in df.columns if "missing" in col]
+    logger.info(f"Dropping the columns that are not needed: {missing_columns + COLUMNS_FOR_ONE_HOT_ENCODING}...")
+    df = df.drop(columns=missing_columns + COLUMNS_FOR_ONE_HOT_ENCODING)
+
     return df
+
+
+def check_df_valid(df: pd.DataFrame) -> None:
+    # Check if the dataframe is valid
+    if df.isna().sum().sum() > 0:
+        logger.error("The dataframe is not valid. There are missing values.")
+        raise ValueError("The dataframe is not valid. There are missing values.")
+
+    for col in df.columns:
+        if df[col].dtype == "int64" or df[col].dtype == "float64":
+            if df[df[col] > 1].shape[0] > 0:
+                raise ValueError(f"The column {col} is not valid. There are values greater than 1.")
+    
+    logger.info("The dataframe is valid!")
 
 
 def reduce_dimensionality(df: pd.DataFrame, n_components: int = 100, target_variance: float = 0.95) -> pd.DataFrame:
     logger.info(f"Reducing dimensionality of {df.shape[1]} features using TruncatedSVD...")
 
+    # Create a sparse matrix
     X_sparse = csr_matrix(df.values)  
+
+    # Normalize the sparse matrix
+    row_sums = np.array(X_sparse.sum(axis=1)).flatten()
+    row_sums[row_sums == 0] = 1
+    X_sparse = X_sparse.multiply(1 / row_sums[:, np.newaxis])
+
     svd = TruncatedSVD(n_components=n_components, random_state=42)
     reduced_array = svd.fit_transform(X_sparse)
 
@@ -172,24 +198,29 @@ def get_heard_and_not_heard_indexes(df: pd.DataFrame) -> tuple[pd.Index, pd.Inde
     # Create a copy of the dataframe
     df = df.copy()
 
-    # Convert dates and filter recent tracks
+    # Filter out the rows where the release date is not in the format YYYY-MM-DD
+    mask_strict = df["spotify_track_release_date"].str.match(r"^\d{4}-\d{2}-\d{2}$")
+    df = df.loc[mask_strict]
+    
+    # Convert the release date to a date object
     df["spotify_track_release_date"] = pd.to_datetime(
         df["spotify_track_release_date"],
-        errors='coerce',
-        format="mixed",
-        infer_datetime_format=True,
-    )
+        format="%Y-%m-%d",
+        errors="coerce"
+    ).dt.date
+    
+    seven_days_ago = (pd.Timestamp.now() - pd.Timedelta(days=7)).date()
 
     # Get the new and old tracks
-    new_tracks = df[df["spotify_track_release_date"] > pd.Timestamp.now() - pd.Timedelta(days=7)]
-    old_tracks = df[df["spotify_track_release_date"] <= pd.Timestamp.now() - pd.Timedelta(days=7)]
+    new_tracks = df[df["spotify_track_release_date"] > seven_days_ago]
+    old_tracks = df[df["spotify_track_release_date"] <= seven_days_ago]
 
     # Get the indexes of the old heard tracks
     old_heard_tracks = old_tracks[old_tracks["spotify_track_heard"]]
     
     # Get the indexes of the heard and not heard tracks
-    old_tracks_indexes = old_heard_tracks.index.tolist()
-    new_tracks_indexes = new_tracks.index.tolist()
+    old_tracks_indexes = list(set(old_heard_tracks.index.tolist()))
+    new_tracks_indexes = list(set(new_tracks.index.tolist()))
 
     return old_tracks_indexes, new_tracks_indexes
 
@@ -233,7 +264,7 @@ def cosine_similarity(output_file_path: str, num_tracks: int) -> None:
 
     # Get the indexes of the heard and not heard tracks 
     logger.info("Getting the indexes of the heard and not heard tracks...")
-    heard_indexes, not_heard_indexes = get_heard_and_not_heard_indexes(df)
+    old_heard_indexes, new_indexes = get_heard_and_not_heard_indexes(df)
 
     # Fill the missing values
     logger.info("Filling the missing values...")
@@ -241,23 +272,28 @@ def cosine_similarity(output_file_path: str, num_tracks: int) -> None:
 
     # Preprocess the data
     logger.info("Preprocessing the data...")
-    df = preprocess_data(df)
-    logger.info(f"Preprocessed data shape: {df.shape}")
+    df_sparse = preprocess_data(df)
+    logger.info(f"Preprocessed data shape: {df_sparse.shape}")
+
+    # Check if the dataframe is valid
+    logger.info("Checking if the dataframe is valid...")
+    check_df_valid(df_sparse)
 
     # Reduce dimensionality
     logger.info("Reducing dimensionality...")
-    df = reduce_dimensionality(df)
+    df_dense = df_sparse.astype(int)
+    df = reduce_dimensionality(df_dense)
     logger.info(f"Reduced data shape: {df.shape}")
 
     # Split the dataframe into heard and not heard tracks
     logger.info("Splitting the dataframe into heard and not heard tracks...")
-    heard_df = df.loc[heard_indexes]
-    not_heard_df = df.loc[not_heard_indexes]
-    logger.info(f"Found {len(not_heard_df)} tracks that have released in last week")
+    old_heard_df = df.loc[old_heard_indexes]
+    new_df = df.loc[new_indexes]
+    logger.info(f"Found {new_df.shape[0]} tracks that have released in last week")
 
     # Get the cosine similarity between the heard and not heard tracks
     logger.info("Generating the cosine similarity matrix...")
-    cosine_similarity = get_cosine_similarity(heard_df, not_heard_df)
+    cosine_similarity = get_cosine_similarity(old_heard_df, new_df)
 
     # Get the top n tracks with the highest cosine similarity
     logger.info(f"Getting the top {num_tracks} tracks with the highest cosine similarity...")
@@ -269,7 +305,11 @@ def cosine_similarity(output_file_path: str, num_tracks: int) -> None:
     logger.info(f"Top {num_tracks} tracks saved to {output_file_path}")
 
 if __name__ == "__main__":
-    args = parse_arguments()
     logger.info("Starting the cosine similarity script...")
+
+    # Parse arguments
+    args = parse_arguments()
+
+    # Run the cosine similarity script
     cosine_similarity(output_file_path=args.output_file_path, num_tracks=args.num_tracks)
     logger.info("Cosine similarity script completed successfully!")

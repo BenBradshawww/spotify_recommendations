@@ -57,6 +57,9 @@ playlist_urls = [
     ("Afrikan Radar", "https://open.spotify.com/user/31yn33ajrpj5uzi6bc7u66v2w424","Best Of Afrobeats", "https://open.spotify.com/playlist/0DmcmP6aWaCVAHzl0B5YOW"),
     ("Afrikan Radar", "https://open.spotify.com/user/31yn33ajrpj5uzi6bc7u66v2w424","Afrobeats Bangers", "https://open.spotify.com/playlist/1trJD4VpeDFh5js6ZheGDM"),
     ("davina1407", "https://open.spotify.com/user/davina1407","Afrochill Best Chilled Afrobeats - Summer 2025", "https://open.spotify.com/playlist/1ewb2XyvHJa54RI2iBrVmr"),
+    ("HipHopNumbers", "https://open.spotify.com/user/1231119230" , "HipHopNumbers Weekly", "https://open.spotify.com/playlist/6UIg0POgmC4ycyYKEaLure"),
+    ("New Tunes Inc", "https://open.spotify.com/user/31psdh4dvsegpa34lza35kvvjxzm", "New Hip Hop", "https://open.spotify.com/playlist/3dIL3zfPPmSLq7P90brGmJ"),
+    ("New Tunes Inc", "https://open.spotify.com/user/31psdh4dvsegpa34lza35kvvjxzm", "New Trending", "https://open.spotify.com/playlist/2LWvtd1mJOiwzQys88U20P"),
 ]
 
 # ----------------------------
