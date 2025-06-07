@@ -19,5 +19,7 @@ target/
 # cache
 .cache
 
-# pycach
+# pycache
 __pycache__/
+__pycache__
+*.pyc

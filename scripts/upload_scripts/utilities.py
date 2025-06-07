@@ -53,8 +53,8 @@ def get_public_ip() -> str:
 
 def create_spotify_client():
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(
-        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")
+        client_id=os.getenv("SPOTIFY_CLIENT_ID"),
+        client_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
     ))
     return sp
 
