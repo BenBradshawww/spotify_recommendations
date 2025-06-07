@@ -34,7 +34,7 @@ A Lambda function triggers an hourly script that fetches the most recent tracks 
 When I’m ready to update the database, I manually start an EC2 instance and run the `update_db.py` script. This script uploads the new track data from S3 to a PostgreSQL database hosted on the EC2 instance. Once the database is updated, I run dbt run to refresh the dbt-managed models. The photo below shows the dbt models that are currently implemented.
 
 <div style="text-align: center;">
-    <img src="images/dbt_models.png" alt="dbt Models" width="75%"/>
+    <img src="images/dbt_models.png" alt="dbt Models" width="100%"/>
 </div>
 
 I will be working on automating this process. To do this I will use AWS ECR and Fargate.
@@ -79,7 +79,7 @@ I compute cosine similarity between these groups to recommend newer songs that a
 Finally, I generate a custom recommendation playlist using the selected tracks and upload it to Spotify via the API.
 
 <div style="text-align: center;">
-    <img src="images/spotify_playlist.png" alt="Playlist" width="50%"/>
+    <img src="images/spotify_playlist.png" alt="Playlist" width="100%"/>
 </div>
 
 ## Other Notes
