@@ -7,7 +7,7 @@ import logging
 import dotenv
 import json
 
-from utilities import upload_rows_to_postgres, create_spotify_client, normalize_date
+from utilities import upload_rows_to_postgres, create_spotify_client, normalize_date, get_db_connection
 # ----------------------------
 # Load environment variables
 # ----------------------------
@@ -56,33 +56,22 @@ def get_album_metadata(albums: list[str]) -> list[tuple]:
 
 
 def get_album_ids():
+    conn, tunnel = get_db_connection()
+
     try:
-        with SSHTunnelForwarder(
-                (os.getenv("TAILSCALE_IP"), 22),
-                ssh_username='ec2-user',
-                ssh_pkey=os.getenv("SSH_KEY_PATH"),
-                remote_bind_address=('localhost', 5432),
-                local_bind_address=('localhost', 5434)
-            ) as tunnel:
-                conn = psycopg2.connect(
-                    dbname='spotify',
-                    user='postgres',
-                    password=os.getenv("POSTGRES_PASSWORD"),
-                    host='localhost',
-                    port=tunnel.local_bind_port
-                )
+        sql_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "get_album_ids_without_meta_data.sql")
+        sql = open(sql_path, "r").read()
 
-                sql_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "get_album_ids_without_meta_data.sql")
-                sql = open(sql_path, "r").read()
-
-                with conn.cursor() as cur:
-                    cur.execute(sql)
-                    artist_ids = cur.fetchall()
-                    return [artist_id[0] for artist_id in artist_ids]
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            artist_ids = cur.fetchall()
+            return [artist_id[0] for artist_id in artist_ids]
     except Exception as e:
         logger.error(traceback.format_exc())
         raise e
-
+    finally:
+        if tunnel:
+            tunnel.stop()
 
     
 # ----------------------------

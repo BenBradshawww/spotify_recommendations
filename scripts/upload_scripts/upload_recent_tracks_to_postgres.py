@@ -11,7 +11,7 @@ from tqdm import tqdm
 from sshtunnel import SSHTunnelForwarder
 from psycopg2.extras import execute_values
 
-from utilities import get_public_ip
+from utilities import get_public_ip, get_db_connection
 
 
 # ----------------------------
@@ -60,7 +60,15 @@ def insert_file_to_db(cur, temp_file_path):
             reader = csv.reader(temp_file)
             next(reader, None)
             rows = [tuple(row) for row in reader]
-                        
+        
+        cur.execute("SHOW search_path")
+        sp = cur.fetchone()[0]
+        logger.info(f"Postgres search_path is: {sp!r}")
+
+        cur.execute("SELECT current_database()")
+        db = cur.fetchone()[0]
+        logger.info(f"Connected to database: {db!r}")
+                            
         columns = ", ".join([
             "spotify_recent_tracks_track_played_at",
             "spotify_recent_tracks_track_id",
@@ -102,47 +110,37 @@ def move_to_processed_folder(source_key: str):
 # Main function
 # ----------------------------
 def upload_recent_tracks_to_db():
+    conn, tunnel = get_db_connection()
+    
     try:
-        with SSHTunnelForwarder(
-            (os.getenv("TAILSCALE_IP"), 22),
-            ssh_username='ec2-user',
-            ssh_pkey=os.getenv("SSH_KEY_PATH"),
-            remote_bind_address=('localhost', 5432),
-            local_bind_address=('localhost', 5434)
-        ) as tunnel:
-            conn = psycopg2.connect(
-                dbname='spotify',
-                user='postgres',
-                password=os.environ.get("POSTGRES_PASSWORD"),
-                host='localhost',
-                port=tunnel.local_bind_port
-            )
-            with conn.cursor() as cur:
-                for key in tqdm(list_files_in_s3()):
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        temp_file_path = os.path.join(temp_dir, "temp.csv")
-                        # Download the S3 object to the temporary file
-                        logger.info(f"Downloading {key} to {temp_file_path}")
-                        s3.download_file(Bucket=SOURCE_BUCKET_NAME, Key=key, Filename=temp_file_path)
-                        
-                        # Read the CSV into a pandas DataFrame
-                        logger.info(f"Inserting {key} to db")
-                        insert_file_to_db(cur, temp_file_path)
+        with conn.cursor() as cur:
+            for key in tqdm(list_files_in_s3()):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    temp_file_path = os.path.join(temp_dir, "temp.csv")
+                    # Download the S3 object to the temporary file
+                    logger.info(f"Downloading {key} to {temp_file_path}")
+                    s3.download_file(Bucket=SOURCE_BUCKET_NAME, Key=key, Filename=temp_file_path)
+                    
+                    # Read the CSV into a pandas DataFrame
+                    logger.info(f"Inserting {key} to db")
+                    insert_file_to_db(cur, temp_file_path)
 
-                        # Commit the transaction
-                        conn.commit()
-                        
-                        # Upload the file to the processed folder
-                        logger.info(f"Uploading {key} to processed folder")
-                        move_to_processed_folder(key)
+                    # Commit the transaction
+                    conn.commit()
+                    
+                    # Upload the file to the processed folder
+                    logger.info(f"Uploading {key} to processed folder")
+                    move_to_processed_folder(key)
 
-                        # Log the completion of the file processing
-                        logger.info(f"Finished processing {key}")
-                        
-            conn.close()
+                    # Log the completion of the file processing
+                    logger.info(f"Finished processing {key}")
     except Exception as e:
         logger.error(traceback.format_exc())
-        raise Exception("Failed to connect through SSH tunnel.")
+        raise Exception(f"Error {e} when uploading {key}")
+    finally:
+        if tunnel:
+            tunnel.stop()
+
     
 if __name__ == "__main__":
     upload_recent_tracks_to_db()

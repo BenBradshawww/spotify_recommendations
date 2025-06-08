@@ -59,35 +59,58 @@ def create_spotify_client():
     return sp
 
 
+def get_db_connection():
+    mode = os.getenv("CONNECT_MODE", "direct")
+
+    if mode == "tunnel":
+        # local dev: spin up SSH tunnel
+        tunnel = SSHTunnelForwarder(
+            (os.getenv("TAILSCALE_IP"), 22),
+            ssh_username=os.getenv("SSH_USER", "ec2-user"),
+            ssh_pkey=os.getenv("SSH_KEY_PATH"),
+            remote_bind_address=('localhost', int(os.getenv("POSTGRES_PORT", 5432))),
+            local_bind_address=('localhost', 5434)
+        )
+        tunnel.start()
+        conn = psycopg2.connect(
+            dbname=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            host='127.0.0.1',
+            port=tunnel.local_bind_port
+        )
+        return conn, tunnel
+
+    else:
+        # direct (Fargate): connect straight to RDS
+        conn = psycopg2.connect(
+            host=os.getenv("POSTGRES_HOST"),
+            port=int(os.getenv("POSTGRES_PORT", 5432)),
+            dbname=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+        )
+
+        return conn, None
+
+
 def upload_rows_to_postgres(rows: list[tuple[str]], sql_path: str) -> None:
 
     sql = open(sql_path, "r").read()
 
+    conn, tunnel = get_db_connection()
     try:
-        with SSHTunnelForwarder(
-            (os.getenv("TAILSCALE_IP"), 22),
-            ssh_username='ec2-user',
-            ssh_pkey=os.getenv("SSH_KEY_PATH"),
-            remote_bind_address=('localhost', 5432),
-            local_bind_address=('localhost', 5434)
-        ) as tunnel:
-            
-            conn = psycopg2.connect(
-                dbname='spotify',
-                user='postgres',
-                password=os.environ.get("POSTGRES_PASSWORD"),
-                host='localhost',
-                port=tunnel.local_bind_port
-            )
-
-            with conn.cursor() as cur:
-                execute_values(cur, sql, rows)
+        with conn.cursor() as cur:
+            execute_values(cur, sql, rows)
 
             conn.commit()
-            conn.close()
     except Exception as e:
         logger.error(traceback.format_exc())
-        raise e
+        raise Exception(f"Error {e} when uploading rows to postgres")
+    finally:
+        if tunnel:
+            tunnel.stop()
+
     
 
 def normalize_date(date_str):
@@ -112,3 +135,4 @@ def normalize_date(date_str):
         return datetime.strptime(normalized, "%Y-%m-%d").date()
     except ValueError:
         return None
+    

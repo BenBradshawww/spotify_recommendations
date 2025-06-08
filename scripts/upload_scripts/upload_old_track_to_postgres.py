@@ -8,7 +8,7 @@ import logging
 import dotenv
 import json
 
-from utilities import get_public_ip
+from utilities import get_public_ip, get_db_connection
 
 # ----------------------------
 # Load environment variables
@@ -109,32 +109,22 @@ def insert_to_db(cur, rows):
 # Main function
 # ----------------------------
 def upload_last_songs_to_db():
+    conn, tunnel = get_db_connection()
     try:
-        with SSHTunnelForwarder(
-            (os.getenv("TAILSCALE_IP"), 22),
-            ssh_username='ec2-user',
-            ssh_pkey=os.getenv("SSH_KEY_PATH"),
-            remote_bind_address=('localhost', 5432),
-            local_bind_address=('localhost', 5434)
-        ) as tunnel:
-            conn = psycopg2.connect(
-                dbname='spotify',
-                user='postgres',
-                password=os.environ.get("POSTGRES_PASSWORD"),
-                host='localhost',
-                port=tunnel.local_bind_port
-            )
-            with conn.cursor() as cur:
-                for file in os.listdir("./data/old_tracks"):
-                    file_path = os.path.join("./data/old_tracks", file)
-                    rows = read_local_old_tracks(file_path)
-                    logger.info(f"Inserting {file} to db")
-                    insert_to_db(cur, rows)
+        with conn.cursor() as cur:
+            for file in os.listdir("./data/old_tracks"):
+                file_path = os.path.join("./data/old_tracks", file)
+                rows = read_local_old_tracks(file_path)
+                logger.info(f"Inserting {file} to db")
+                insert_to_db(cur, rows)
 
-                conn.commit()
+            conn.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
         raise Exception(f"Error uploading old tracks to db: {e}")
+    finally:
+        if tunnel:
+            tunnel.stop()
     
 if __name__ == "__main__":
     upload_last_songs_to_db()

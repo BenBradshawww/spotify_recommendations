@@ -10,7 +10,9 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import dotenv
 import json
 
-from utilities import get_public_ip, upload_rows_to_postgres, create_spotify_client
+from utilities import get_public_ip, upload_rows_to_postgres, create_spotify_client, get_db_connection
+
+
 # ----------------------------
 # Load environment variables
 # ----------------------------
@@ -60,28 +62,20 @@ def get_track_metadata(tracks: list[str]) -> list[tuple[str, str, str, str, str,
 
 def get_track_ids():
     try:
-        with SSHTunnelForwarder(
-                (os.getenv("TAILSCALE_IP"), 22),
-                ssh_username='ec2-user',
-                ssh_pkey=os.getenv("SSH_KEY_PATH"),
-                remote_bind_address=('localhost', 5432),
-                local_bind_address=('localhost', 5434)
-            ) as tunnel:
-                conn = psycopg2.connect(
-                    dbname='spotify',
-                    user='postgres',
-                    password=os.getenv("POSTGRES_PASSWORD"),
-                    host='localhost',
-                    port=tunnel.local_bind_port
-                )
+        conn, tunnel = get_db_connection()
 
-                sql_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "get_track_ids_without_meta_data.sql")
-                sql = open(sql_path, "r").read()
+        sql_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sql", "get_track_ids_without_meta_data.sql")
+        sql = open(sql_path, "r").read()
 
-                with conn.cursor() as cur:
-                    cur.execute(sql)
-                    track_ids = cur.fetchall()
-                    return [track_id[0] for track_id in track_ids]
+        try:
+            with conn.cursor() as cur:
+                cur.execute(sql)
+                track_ids = cur.fetchall()
+                return [track_id[0] for track_id in track_ids]
+        finally:
+            if tunnel:
+                tunnel.stop()
+
     except Exception as e:
         logger.error(traceback.format_exc())
         raise e
