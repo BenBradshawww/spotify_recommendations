@@ -21,5 +21,10 @@ target/
 
 # pycache
 __pycache__/
-__pycache__
-*.pyc
+**/__pycache__/
+
+# macos
+.DS_Store
+
+# Task definitions
+task-def.json

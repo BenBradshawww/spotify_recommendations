@@ -3,3 +3,13 @@ pandas
 numpy
 scikit-learn
 plotly
+boto3
+torch
+torch-geometric
+spotipy
+psycopg2-binary
+dbt-core
+dbt-postgres
+dotenv
+sshtunnel
+sqlalchemy
