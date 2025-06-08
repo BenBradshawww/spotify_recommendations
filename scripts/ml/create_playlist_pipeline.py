@@ -2,7 +2,7 @@ import logging
 import argparse
 from datetime import datetime
 
-from utilities import create_playlist
+from create_playlist import create_playlist
 from cosine_similarity import cosine_similarity
 
 
