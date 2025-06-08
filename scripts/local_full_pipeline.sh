@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Disable AWS pager
+export AWS_PAGER=""
+
 # Export everything read from .env
 set -o allexport
 source .env
@@ -18,7 +21,9 @@ function cleanup {
   fi
 
   echo "$(date): Stopping EC2 instance $EC2_INSTANCE_ID"
-  aws ec2 stop-instances --instance-ids "$EC2_INSTANCE_ID"
+  aws ec2 stop-instances \
+    --instance-ids "$EC2_INSTANCE_ID" \
+    > /dev/null
 }
 trap cleanup EXIT
 
@@ -26,7 +31,10 @@ trap cleanup EXIT
 # 1. Start EC2
 #----------------------------------------
 echo "$(date): Starting EC2 instance $EC2_INSTANCE_ID"
-aws ec2 start-instances --instance-ids "$EC2_INSTANCE_ID"
+aws ec2 start-instances \
+    --instance-ids "$EC2_INSTANCE_ID" \
+    > /dev/null
+
 
 echo "$(date): Waiting for instance to enter 'running' state…"
 aws ec2 wait instance-running --instance-ids "$EC2_INSTANCE_ID"
@@ -43,6 +51,26 @@ until ssh -o BatchMode=yes \
   echo "$(date): SSH check failed, retrying…" >&2
   sleep 5
 done
+
+#----------------------------------------
+# 3. Establish SSH tunnel (local port forwarding)
+#----------------------------------------
+echo "$(date): Establishing SSH tunnel localhost:$LOCAL_PORT → $REMOTE_HOST:$REMOTE_PORT"
+ssh -i "$SSH_KEY_PATH" \
+    -o ExitOnForwardFailure=yes \
+    -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null \
+    -L "${LOCAL_PORT}:localhost:${REMOTE_PORT}" \
+    -N -f \
+    "$SSH_USER@$REMOTE_HOST"
+TUNNEL_PID=$(pgrep -f "ssh -i $SSH_KEY_PATH.*-L ${LOCAL_PORT}:localhost:${REMOTE_PORT}")
+
+# Verify tunnel
+sleep 2
+if ! nc -z localhost $LOCAL_PORT; then
+  echo "ERROR: SSH tunnel failed to open on localhost:$LOCAL_PORT" >&2
+  exit 1
+fi
 
 #----------------------------------------
 # 4. Run your pipeline (using forwarded port)

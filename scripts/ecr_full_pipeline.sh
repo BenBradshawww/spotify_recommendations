@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Disable AWS pager
+export AWS_PAGER=""
+
 # Export everything read from .env
 #set -o allexport
 #source .env
@@ -21,7 +24,9 @@ function cleanup {
   fi
 
   echo "$(date): Stopping EC2 instance $EC2_INSTANCE_ID"
-  aws ec2 stop-instances --instance-ids "$EC2_INSTANCE_ID"
+  aws ec2 stop-instances \
+    --instance-ids "$EC2_INSTANCE_ID" \
+    > 1>/dev/null
 }
 trap cleanup EXIT
 
@@ -29,10 +34,12 @@ trap cleanup EXIT
 # 1. Start EC2
 #----------------------------------------
 echo "$(date): Starting EC2 instance $EC2_INSTANCE_ID"
-aws ec2 start-instances --instance-ids "$EC2_INSTANCE_ID"
+aws ec2 start-instances \
+    --instance-ids "$EC2_INSTANCE_ID" \
+    > /dev/null 2>&1
 
 echo "$(date): Waiting for instance to enter 'running' state…"
-aws ec2 wait instance-running --instance-ids "$EC2_INSTANCE_ID"
+aws ec2 wait instance-running --instance-ids "$EC2_INSTANCE_ID" 
 
 #----------------------------------------
 # 2. Wait for SSH on the instance
