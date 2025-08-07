@@ -1,6 +1,7 @@
-import logging
 import sys
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'upload_scripts'))
 
@@ -9,11 +10,32 @@ from upload_playlists import upload_playlists
 from upload_track_meta_data import upload_track_meta_data
 from upload_album_meta_data import upload_album_meta_data
 from upload_artist_meta_data import upload_artist_meta_data
+
+
 # ----------------------------
 # Logging
 # ----------------------------
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+project_dir = os.path.dirname(os.path.dirname(__file__))
+logs_path = os.path.join(project_dir, "logs/update_db_logs")
+file_handler = RotatingFileHandler(
+    logs_path,
+    mode='a',
+    maxBytes=5 * 1024 * 1024,
+    backupCount=5,
+)
+file_handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 
 # ----------------------------
