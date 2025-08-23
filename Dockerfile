@@ -11,6 +11,7 @@ RUN apt-get update \
       netcat-openbsd \
       procps \
  && rm -rf /var/lib/apt/lists/*
+
 # Copy and install requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -19,7 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY scripts/ ./scripts/
 COPY dbt_project.yml dbt_project.yml
 COPY dbt/ ./dbt/
-#COPY .env .env
 
 # Ensure the dbt binary is available if using dbt-core
 RUN pip install --no-cache-dir dbt-core
