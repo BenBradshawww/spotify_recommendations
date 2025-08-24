@@ -13,7 +13,6 @@ variable "lambda_function_handler" {
 variable "aws_region" {
   type        = string
   description = "The AWS region to deploy the Lambda function"
-  default     = "eu-north-1"
 }
 
 variable "lambda_function_zip_name" {
