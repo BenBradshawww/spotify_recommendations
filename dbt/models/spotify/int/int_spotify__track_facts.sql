@@ -95,6 +95,24 @@ year_skipped_tracks_stats AS (
     GROUP BY spotify_track_id
 ),
 
+count_streams_one_month AS (
+  SELECT
+    spotify_track_id,
+    COUNT(*) OVER (
+      PARTITION BY spotify_track_id
+      ORDER BY spotify_track_played_at
+      RANGE BETWEEN INTERVAL '1 month' PRECEDING AND CURRENT ROW
+    ) AS streams_last_month
+  FROM tracks
+),
+
+max_streams_one_month AS (
+  SELECT
+    spotify_track_id,
+    MAX(streams_last_month) AS max_streams_in_any_month
+  FROM count_streams_one_month
+  GROUP BY spotify_track_id
+),
 
 track_facts AS (
     SELECT 
@@ -105,7 +123,8 @@ track_facts AS (
         lifetime_skipped_tracks_stats.lifetime_avg_time_listened_to_track,
         lifetime_skipped_tracks_stats.lifetime_prop_track_skipped,
         three_month_skipped_tracks_stats.three_month_prop_skipped,
-        year_skipped_tracks_stats.year_prop_skipped
+        year_skipped_tracks_stats.year_prop_skipped,
+        max_streams_in_any_month
     FROM lifetime_track_counts
     LEFT JOIN three_month_track_counts
         ON lifetime_track_counts.spotify_track_id = three_month_track_counts.spotify_track_id
@@ -117,6 +136,8 @@ track_facts AS (
         ON lifetime_track_counts.spotify_track_id = three_month_skipped_tracks_stats.spotify_track_id
     LEFT JOIN year_skipped_tracks_stats
         ON lifetime_track_counts.spotify_track_id = year_skipped_tracks_stats.spotify_track_id
+    LEFT JOIN max_streams_one_month
+        ON lifetime_track_counts.spotify_track_id = max_streams_one_month.spotify_track_id
 )
 
 SELECT * FROM track_facts

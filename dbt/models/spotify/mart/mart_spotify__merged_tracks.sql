@@ -53,7 +53,8 @@ track_facts as (
         one_year_genre_listen_count,
         lifetime_genre_listen_count,
         three_month_genre_listen_prop,
-        one_year_genre_listen_prop
+        one_year_genre_listen_prop,
+        max_streams_in_any_month
     FROM
         {{ ref("mart_spotify__track_facts") }}
 )
@@ -89,6 +90,7 @@ SELECT
     track_facts.one_year_album_listen_prop,
     track_facts.three_month_genre_listen_prop,
     track_facts.one_year_genre_listen_prop,
+    track_facts.max_streams_in_any_month,
     COALESCE(track_facts.play_count, 0) AS play_count,
     COALESCE(track_facts.three_month_play_count, 0) AS three_month_play_count,
     COALESCE(track_facts.one_year_play_count, 0) AS one_year_play_count,

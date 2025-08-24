@@ -1,0 +1,165 @@
+version: 2
+
+models:
+  - name: mart_spotify__merged_tracks
+    description: >
+      Enriched Spotify track dimension with track/album/artist attributes and
+      listening facts (counts, proportions, rolling maxima).
+    config:
+      tags: ["spotify", "mart"]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - spotify_track_id
+            - spotify_artist_id
+            - spotify_album_id
+            - spotify_artist_genre
+    columns:
+      - name: spotify_track_id
+        description: Primary track identifier.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('mart_spotify__all_tracks')
+              field: spotify_track_id
+
+      - name: spotify_track_name
+        description: Track title.
+
+      - name: spotify_track_heard
+        description: Boolean/flag if you've listened to the track at least once.
+
+      - name: spotify_album_id
+        description: Album identifier.
+        tests:
+          - not_null
+
+      - name: spotify_album_name
+        description: Album title.
+
+      - name: spotify_artist_id
+        description: Artist identifier.
+        tests:
+          - not_null
+
+      - name: spotify_artist_name
+        description: Artist name.
+
+      - name: spotify_track_release_date
+        description: Track release date (as provided by Spotify).
+
+      - name: spotify_track_duration_ms
+        description: Track duration in milliseconds.
+
+      - name: spotify_track_number
+        description: Track number on the album.
+
+      - name: spotify_track_popularity
+        description: Spotify popularity score for the track (0–100).
+
+      - name: spotify_artist_followers_total
+        description: Total followers for the artist.
+
+      - name: spotify_artist_popularity
+        description: Spotify popularity score for the artist (0–100).
+
+      - name: spotify_artist_genre
+        description: A single representative genre for the artist (if mapped).
+
+      - name: spotify_artist_genres
+        description: Array/list of genres for the artist (raw from Spotify).
+
+      - name: spotify_album_release_date
+        description: Album release date.
+
+      - name: spotify_album_total_tracks
+        description: Total number of tracks on the album.
+
+      - name: spotify_album_type
+        description: Album type/category.
+        tests:
+          - accepted_values:
+              values: ["album", "single", "compilation"]
+
+      - name: spotify_album_artist_ids
+        description: List/array of contributing artist IDs.
+
+      - name: spotify_album_artist_names
+        description: List/array of contributing artist names.
+
+      - name: spotify_album_label
+        description: Label associated with the album.
+
+      - name: spotify_album_popularity
+        description: Spotify popularity score for the album (0–100).
+
+      - name: three_month_prop_skipped
+        description: Proportion of plays skipped within 3 months window (0–1).
+
+      - name: year_prop_skipped
+        description: Proportion of plays skipped within 1 year window (0–1).
+
+      - name: three_month_artist_listen_prop
+        description: Share of listens to this artist in last 3 months (0–1).
+
+      - name: one_year_artist_listen_prop
+        description: Share of listens to this artist in last year (0–1).
+
+      - name: three_month_album_listen_prop
+        description: Share of listens to this album in last 3 months (0–1).
+
+      - name: one_year_album_listen_prop
+        description: Share of listens to this album in last year (0–1).
+
+      - name: three_month_genre_listen_prop
+        description: Share of listens to this genre in last 3 months (0–1).
+
+      - name: one_year_genre_listen_prop
+        description: Share of listens to this genre in last year (0–1).
+
+      - name: max_streams_in_any_month
+        description: Rolling max monthly streams for the track (per grain).
+
+      - name: play_count
+        description: Lifetime play count for the track.
+        tests:
+          - not_null
+
+      - name: three_month_play_count
+        description: Plays in the last 3 months.
+
+      - name: one_year_play_count
+        description: Plays in the last year.
+
+      - name: lifetime_avg_time_listened_to_track
+        description: Avg time listened per play across lifetime (seconds or ms).
+
+      - name: lifetime_prop_track_skipped
+        description: Lifetime proportion of plays that were skipped (0–1).
+
+      - name: three_month_album_listen_count
+        description: Album listens in the last 3 months.
+
+      - name: one_year_album_listen_count
+        description: Album listens in the last year.
+
+      - name: lifetime_album_listen_count
+        description: Lifetime album listens.
+
+      - name: three_month_artist_listen_count
+        description: Artist listens in the last 3 months.
+
+      - name: one_year_artist_listen_count
+        description: Artist listens in the last year.
+
+      - name: lifetime_artist_listen_count
+        description: Lifetime artist listens.
+
+      - name: three_month_genre_listen_count
+        description: Genre listens in the last 3 months.
+
+      - name: one_year_genre_listen_count
+        description: Genre listens in the last year.
+
+      - name: lifetime_genre_listen_count
+        description: Lifetime genre listens.

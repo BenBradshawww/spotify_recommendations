@@ -18,7 +18,8 @@ track_facts AS (
     lifetime_avg_time_listened_to_track,
     lifetime_prop_track_skipped,
     three_month_prop_skipped,
-    year_prop_skipped
+    year_prop_skipped,
+    max_streams_in_any_month
   FROM {{ ref('int_spotify__track_facts') }}
 ),
 
@@ -70,6 +71,7 @@ all_tracks_with_facts AS (
     track_facts.lifetime_prop_track_skipped,
     track_facts.three_month_prop_skipped,
     track_facts.year_prop_skipped,
+    track_facts.max_streams_in_any_month,
     album_facts.three_month_album_listen_count,
     album_facts.one_year_album_listen_count,
     album_facts.lifetime_album_listen_count,

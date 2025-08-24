@@ -34,7 +34,6 @@ three_month_artist_listen_counts AS (
     GROUP BY spotify_artist_id
 ),
 
-
 one_year_artist_listen_counts AS (
     SELECT
         spotify_artist_id,
