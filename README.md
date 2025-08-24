@@ -18,6 +18,7 @@ This project is a data pipeline and recommendation system for Spotify. It is bui
     <img src="https://img.shields.io/badge/Bash-121011?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Bash">
     <img src="https://img.shields.io/badge/Lightdash-1A73E8?style=for-the-badge&logoColor=white" alt="Lightdash">
     <img src="https://img.shields.io/badge/Tailscale-0046FF?style=for-the-badge&logo=tailscale&logoColor=white" alt="Tailscale">
+    <img src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white" alt="Terraform">
 </p>
 
 
@@ -86,13 +87,9 @@ Finally, I generate a custom recommendation playlist using the selected tracks a
 
 - I am using the `pgAdmin` to manage my PostgreSQL database.
 - I am using the `Lightdash` to view my dbt-managed tables.
-- I am using the `Tailscale` to connect to the EC2 instance from any network. Currently, my EC2 only accepts connections from my home network so to bypass this I use Tailscale to connect to the EC2 instance from any network.
 
 ## Next Steps
-- Investigate the use of Feature Hashing for the categorical features. 
 - Investigate the use of GNNs for genre and artist recommendations.
 - Investigate the use of reinforcement learning.
-- Investigate alternate playlist recommendation methods similar to collobartive filtering.
-
-## Future Ideas
-I could use contrastive learning and a GNN to create an embedding vector for each genre. I would make a similiarity matrix based on the hop distance and the edge weighting between each genre. This similiraity matrix would then be used as the labels for each genre and an embedding can be constructed with a GNN and trained to minimise a constructive loss function with soft labels.
+- Try out a content-based filtering model.
+- Deploy the scripts with AWS ECS.
